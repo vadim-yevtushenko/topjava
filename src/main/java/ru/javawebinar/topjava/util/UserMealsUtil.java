@@ -25,6 +25,9 @@ public class UserMealsUtil {
         List<UserMealWithExcess> mealsTo = filteredByCycles(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
         mealsTo.forEach(System.out::println);
 
+        List<UserMealWithExcess> mealsTo2 = filteredByOneCycle(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
+        mealsTo2.forEach(System.out::println);
+
         System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
@@ -44,10 +47,31 @@ public class UserMealsUtil {
         return result;
     }
 
+    public static List<UserMealWithExcess> filteredByOneCycle(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        List<UserMealWithExcess> result = new ArrayList<>();
+        ArrayList<UserMeal> mealArrayList = new ArrayList<>(meals);
+        Map<LocalDate, Integer> sumCaloriesPerDay = new HashMap<>();
+        for (int i = 0; i < mealArrayList.size(); i++) {
+            if (i < meals.size()) {
+                sumCaloriesPerDay.put(LocalDate.from(mealArrayList.get(i).getDateTime())
+                        , mealArrayList.get(i).getCalories() + sumCaloriesPerDay.getOrDefault(LocalDate.from(mealArrayList.get(i).getDateTime())
+                                , 0));
+                mealArrayList.add(mealArrayList.get(i));
+            } else {
+                if (TimeUtil.isBetweenHalfOpen(mealArrayList.get(i).getDateTime().toLocalTime(), startTime, endTime)){
+                    result.add(fromUserMealToUserMealWithExcess(mealArrayList.get(i)
+                            , sumCaloriesPerDay.get(LocalDate.from(mealArrayList.get(i).getDateTime()))
+                            , caloriesPerDay));
+                }
+            }
+        }
+        return result;
+    }
+
     public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
 
         return meals.stream()
-                .collect(new MyCollector(startTime, endTime, caloriesPerDay));
+                .collect(partitioningByLimitCaloriesPerDay(startTime, endTime, caloriesPerDay));
     }
 
     public static UserMealWithExcess fromUserMealToUserMealWithExcess(UserMeal userMeal,int sumCaloriesOfUserMealPerDay, int caloriesPerDay) {
