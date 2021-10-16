@@ -26,7 +26,7 @@
 <h2>Meals</h2>
 
 
-<a href="meal?action=create"/>Add Meal</a>
+<a href="meals?action=create"/>Add Meal</a>
 <br>
 <br>
 
@@ -62,8 +62,8 @@
             </td>
             <td>${meal.description}</td>
             <td>${meal.calories}</td>
-            <td><a href="meal?action=update">Update </a></td>
-            <td><a href="meals?action=delete">Delete</a></td>
+            <td><a href="meals?action=update&id=${meal.id}">Update </a></td>
+            <td><a href="meals?action=delete&id=${meal.id}">Delete</a></td>
         </tr>
 
     </c:forEach>
